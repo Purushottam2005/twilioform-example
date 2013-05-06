@@ -13,6 +13,8 @@ import org.twiliofaces.request.TwilioCaller;
 import org.twiliofaces.request.TwilioSmsSender;
 import org.twiliofaces.test.twilioform.model.CallToMake;
 import org.twiliofaces.test.twilioform.model.SmsToSend;
+import org.twiliofaces.test.twilioform.repository.CallRepository;
+import org.twiliofaces.test.twilioform.repository.SmsRepository;
 import org.twiliofaces.test.twilioform.service.CallerTimerService;
 import org.twiliofaces.test.twilioform.service.SmsTimerService;
 
@@ -48,6 +50,14 @@ public class SenderController implements Serializable {
 	@Inject
 	SmsTimerService smsTimerService;
 
+	@Inject
+	CallRepository callRepository;
+
+	@Inject
+	SmsRepository smsRepository;
+
+	static String URL = "https://duilio.twiliofaces.org/twilioform-example-0.0.1/say.jsf";
+
 	private boolean sms;
 	private boolean now;
 
@@ -58,14 +68,16 @@ public class SenderController implements Serializable {
 		// TODO Auto-generated constructor stub
 	}
 
-	public void schedule() {
+	public String schedule() {
 		if (sms) {
 			if (now) {
 				try {
+					System.out.println(getSmsToSend());
 					String smsId = twilioSmsSender.setAccountSid(accountSid)
 							.setAuthToken(twilioToken).setFrom(from)
 							.setTo(getSmsToSend().getTo())
 							.setBody(getSmsToSend().getText()).send();
+					smsRepository.save(getSmsToSend());
 					System.out.println("sms id: " + smsId);
 				} catch (TwilioRestException e) {
 					// TODO Auto-generated catch block
@@ -73,14 +85,18 @@ public class SenderController implements Serializable {
 				}
 			} else {
 				smsTimerService.createTimer(getSmsToSend());
+				smsRepository.save(getSmsToSend());
 			}
 		} else {
+			System.out.println(getCallToMake());
+			getCallToMake().setUrl(URL + "?uid=" + getCallToMake().getUid());
 			if (now) {
 				try {
 					String callId = twilioCaller.setAccountSid(accountSid)
 							.setAuthToken(twilioToken).setFrom(from)
 							.setTo(getCallToMake().getTo())
 							.setEndpoint(getCallToMake().getUrl()).call();
+					callRepository.save(getCallToMake());
 					System.out.println("call id: " + callId);
 				} catch (TwilioRestException e) {
 					// TODO Auto-generated catch block
@@ -88,18 +104,26 @@ public class SenderController implements Serializable {
 				}
 			} else {
 				callerTimerService.createTimer(getCallToMake());
+				callRepository.save(getCallToMake());
 			}
 		}
+		reset();
+		return "sms_call.xhtml";
 	}
 
-	public void reset() {
+	public String reset() {
 		this.smsToSend = null;
 		this.callToMake = null;
+		return null;
 	}
 
 	public SmsToSend getSmsToSend() {
-		if (smsToSend == null)
+		if (smsToSend == null) {
 			this.smsToSend = new SmsToSend();
+			this.smsToSend.setAccountSid(accountSid);
+			this.smsToSend.setFrom(from);
+			this.smsToSend.setTwilioToken(twilioToken);
+		}
 		return smsToSend;
 	}
 
@@ -108,8 +132,12 @@ public class SenderController implements Serializable {
 	}
 
 	public CallToMake getCallToMake() {
-		if (callToMake == null)
+		if (callToMake == null) {
 			this.callToMake = new CallToMake();
+			this.callToMake.setAccountSid(accountSid);
+			this.callToMake.setFrom(from);
+			this.callToMake.setTwilioToken(twilioToken);
+		}
 		return callToMake;
 	}
 

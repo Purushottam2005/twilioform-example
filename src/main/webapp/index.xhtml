@@ -10,38 +10,76 @@
 	<title>Schedule of sms or calls</title>
 </h:head>
 <h:body>
-	<h:form>
-		<h:panelGrid columns="2">
-			<h:outputLabel value="sms or call?" for="smsorcall" />
-			<h:selectOneRadio value="#{senderController.sms}" id="smsorcall">
-				<f:selectItems value="#{siNoItems}" />
-			</h:selectOneRadio>
+	<center>
+		<h:form>
+			<h:panelGrid columns="2" id="smsCall">
+				<h:outputLabel value="sms or call?" for="smsorcall" />
+				<h:selectOneRadio value="#{senderController.sms}" id="smsorcall">
+					<f:selectItems value="#{smsCallItems}" />
+					<f:ajax event="change" render="sms call" execute="@this" />
+				</h:selectOneRadio>
 
-			<h:panelGroup rendered="#{senderController.sms}">
-				<h:outputLabel value="to:" for="smsTo" />
-				<h:inputText value="#{senderController.smsToSend.to}" id="smsTo" />
+				<h:outputLabel value="adesso?" for="now" />
+				<h:selectOneRadio value="#{senderController.now}" id="now">
+					<f:selectItems value="#{siNoItems}" />
+					<f:ajax event="change" render="sms call" execute="@this" />
+				</h:selectOneRadio>
 
-				<h:outputLabel value="text: " for="smsText" />
-				<h:inputTextarea value="#{senderController.smsToSend.text}"
-					id="smsText" />
+			</h:panelGrid>
+
+			<h:panelGroup id="sms">
+				<h:panelGrid columns="2" rendered="#{senderController.sms}">
+					<f:facet name="header">sms</f:facet>
+					<h:outputLabel value="to:" for="smsTo" />
+					<h:inputText value="#{senderController.smsToSend.to}" id="smsTo" />
+
+					<h:outputLabel value="text: " for="smsText" />
+					<h:inputTextarea value="#{senderController.smsToSend.text}"
+						id="smsText" />
+				</h:panelGrid>
+				<h:panelGrid columns="2"
+					rendered="#{senderController.sms and (not senderController.now)}">
+					<f:facet name="header">data sms</f:facet>
+					<h:outputLabel value="yyyy-MM-dd HH:mm: " for="smsDate" />
+					<h:inputText value="#{senderController.smsToSend.when}"
+						id="smsDate">
+						<f:convertDateTime pattern="yyyy-MM-dd HH:mm" />
+					</h:inputText>
+				</h:panelGrid>
 			</h:panelGroup>
 
-			<h:panelGroup rendered="#{not senderController.sms}">
-				<h:outputLabel value="to:" for="callTo" />
-				<h:inputText value="#{senderController.callToMake.to}" id="callTo" />
+			<h:panelGroup id="call">
+				<h:panelGrid columns="2" rendered="#{not senderController.sms}">
+					<f:facet name="header">call</f:facet>
+					<h:outputLabel value="to:" for="callTo" />
+					<h:inputText value="#{senderController.callToMake.to}" id="callTo" />
 
-				<h:outputLabel value="text: " for="callText" />
-				<h:inputTextarea value="#{senderController.callToMake.text}"
-					id="callText" />
+					<h:outputLabel value="text: " for="callText" />
+					<h:inputTextarea value="#{senderController.callToMake.text}"
+						id="callText" />
+				</h:panelGrid>
+				<h:panelGrid columns="2"
+					rendered="#{(not senderController.sms) and (not senderController.now)}">
+					<f:facet name="header">data call</f:facet>
+					<h:outputLabel value="yyyy-MM-dd HH:mm: " for="callDate" />
+					<h:inputText value="#{senderController.callToMake.when}"
+						id="callDate">
+						<f:convertDateTime pattern="yyyy-MM-dd HH:mm" />
+					</h:inputText>
+				</h:panelGrid>
+
 			</h:panelGroup>
 
+			<h:panelGrid columns="2">
+				<h:commandButton action="#{senderController.schedule}"
+					value="schedule" />
 
-			<h:commandButton action="#{senderController.schedule}"
-				value="schedule" />
+				<h:commandButton action="#{senderController.reset}" value="reset" />
+			</h:panelGrid>
+		</h:form>
+	</center>
 
-			<h:commandButton action="#{senderController.reset}" value="reset" />
-		</h:panelGrid>
-	</h:form>
+	<a href="sms_call.jsf">lista sms/call</a>
 
 </h:body>
 
