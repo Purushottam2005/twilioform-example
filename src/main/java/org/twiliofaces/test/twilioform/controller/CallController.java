@@ -9,7 +9,6 @@ import javax.inject.Named;
 import org.twiliofaces.annotations.TwilioScope;
 import org.twiliofaces.annotations.notification.CallSid;
 import org.twiliofaces.annotations.notification.From;
-import org.twiliofaces.annotations.notification.RecordingUrl;
 import org.twiliofaces.extension.TwilioScoped;
 import org.twiliofaces.test.twilioform.annotation.Uid;
 import org.twiliofaces.test.twilioform.model.CallToMake;
@@ -32,10 +31,6 @@ public class CallController implements TwilioScoped, Serializable {
 	@From
 	Instance<String> from;
 
-	@Inject
-	@RecordingUrl
-	Instance<String> recordingUrl;
-
 	private CallToMake callToMake;
 
 	@Inject
@@ -53,10 +48,6 @@ public class CallController implements TwilioScoped, Serializable {
 
 	public String getFrom() {
 		return from.get();
-	}
-
-	public String getRecordingUrl() {
-		return recordingUrl.get();
 	}
 
 	public void log() {
